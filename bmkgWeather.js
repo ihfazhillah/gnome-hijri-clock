@@ -15,8 +15,10 @@ import Pango from 'gi://Pango';
 import Soup from 'gi://Soup';
 import St from 'gi://St';
 
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
 const API = 'https://api.bmkg.go.id/publik/prakiraan-cuaca';
-const MAX_COLS = 8;
+const MAX_COLS = 6;
 
 /** Petakan deskripsi cuaca BMKG ke nama ikon simbolik GNOME. */
 function symbolicIcon(desc, isNight) {
@@ -52,7 +54,7 @@ function localHourLabel(s) {
 
 export const BmkgWeatherSection = GObject.registerClass(
 class BmkgWeatherSection extends St.Button {
-    _init(settings) {
+    _init(settings, openPrefs) {
         super._init({
             style_class: 'weather-button',
             can_focus: true,
@@ -60,6 +62,7 @@ class BmkgWeatherSection extends St.Button {
         });
 
         this._settings = settings;
+        this._openPrefs = openPrefs;
         this._session = new Soup.Session({timeout: 15, user_agent: 'gnome-hijri-clock'});
         this._cancellable = null;
         this._timerId = 0;
@@ -105,7 +108,13 @@ class BmkgWeatherSection extends St.Button {
     }
 
     vfunc_clicked() {
-        this.refresh();
+        // Klik membuka pengaturan (untuk memilih/ubah lokasi cuaca).
+        if (this._openPrefs) {
+            Main.panel.statusArea.dateMenu.menu.close();
+            this._openPrefs();
+        } else {
+            this.refresh();
+        }
     }
 
     _setStatus(text) {

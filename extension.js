@@ -7,6 +7,7 @@
  */
 
 import Clutter from 'gi://Clutter';
+import Pango from 'gi://Pango';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -78,7 +79,8 @@ export default class HijriClockExtension extends Extension {
 
         // 4) Cuaca BMKG — section sendiri, ditaruh setelah cuaca bawaan.
         this._weatherItem = dateMenu._weatherItem;
-        this._bmkgWeather = new BmkgWeatherSection(this._settings);
+        this._bmkgWeather = new BmkgWeatherSection(
+            this._settings, () => this.openPreferences());
         const displaysBox = this._weatherItem.get_parent();
         displaysBox.insert_child_above(this._bmkgWeather, this._weatherItem);
 
@@ -201,33 +203,18 @@ export default class HijriClockExtension extends Extension {
         for (const btn of buttons) {
             if (!btn?._date || btn._hijriDecorated)
                 continue;
-            const child = btn.get_child();
-            if (!child)
+            const label = btn.get_child();
+            if (!label?.clutter_text)
                 continue;
 
-            // Bungkus angka Masehi + angka Hijriah dalam kolom vertikal.
-            btn.remove_child(child);
-            child.x_align = Clutter.ActorAlign.CENTER;
-            child.y_align = Clutter.ActorAlign.CENTER;
-
-            const box = new St.BoxLayout({
-                vertical: true,
-                x_expand: true,
-                y_expand: true,
-                x_align: Clutter.ActorAlign.CENTER,
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            box.add_child(child);
-
-            const hijri = new St.Label({
-                text: formatHijri(btn._date, offset, calType, {day: 'numeric'}),
-                style_class: 'hijri-day-number',
-                x_align: Clutter.ActorAlign.CENTER,
-            });
-            hijri.clutter_text.x_align = Clutter.ActorAlign.CENTER;
-            box.add_child(hijri);
-
-            btn.set_child(box);
+            // Tambah angka Hijriah sebagai baris kedua lewat Pango markup pada
+            // label bawaan — warna tema angka Masehi tetap terjaga.
+            const greg = btn.label ?? label.get_text();
+            const hd = formatHijri(btn._date, offset, calType, {day: 'numeric'});
+            label.clutter_text.use_markup = true;
+            label.clutter_text.set_markup(
+                `${greg}\n<span size="x-small" alpha="60%">${hd}</span>`);
+            label.clutter_text.line_alignment = Pango.Alignment.CENTER;
             btn._hijriDecorated = true;
         }
     }
