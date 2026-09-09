@@ -7,7 +7,6 @@
  */
 
 import Clutter from 'gi://Clutter';
-import Pango from 'gi://Pango';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -75,6 +74,14 @@ export default class HijriClockExtension extends Extension {
         this._selectedDateId = this._calendar.connect(
             'selected-date-changed', (_cal, datetime) => {
                 this._updatePopupHeader(new Date(datetime.to_unix() * 1000));
+                this._recolorCalendar();
+            });
+
+        // Segarkan warna kalender tiap menu dibuka (mengikuti tema terkini).
+        this._menuOpenId = dateMenu.menu.connect('open-state-changed',
+            (_menu, isOpen) => {
+                if (isOpen)
+                    this._recolorCalendar();
             });
 
         // 4) Cuaca BMKG — section sendiri, ditaruh setelah cuaca bawaan.
@@ -107,6 +114,10 @@ export default class HijriClockExtension extends Extension {
         if (this._selectedDateId) {
             this._calendar.disconnect(this._selectedDateId);
             this._selectedDateId = null;
+        }
+        if (this._menuOpenId) {
+            this._dateMenu.menu.disconnect(this._menuOpenId);
+            this._menuOpenId = null;
         }
         if (this._settingsId) {
             this._settings.disconnect(this._settingsId);
@@ -200,25 +211,68 @@ export default class HijriClockExtension extends Extension {
         if (!buttons)
             return;
         const {offset, calType} = this._config();
+        let count = 0;
         for (const btn of buttons) {
             if (!btn?._date || btn._hijriDecorated)
                 continue;
-            const label = btn.get_child();
-            if (!label?.clutter_text)
+            const native = btn.get_child();
+            if (!native)
                 continue;
 
-            // Tambah angka Hijriah sebagai baris kedua lewat Pango markup pada
-            // label bawaan. Markup di-set melalui properti `text` St.Label
-            // (bukan langsung clutter_text) dengan use_markup aktif, agar tidak
-            // terhapus saat St menyinkronkan ulang label. Warna angka Hijriah
-            // mewarisi warna label asli (alpha 60%) sehingga otomatis
-            // menyesuaikan tema terang/gelap dan status hari (ini/lain bulan).
-            const greg = label.get_text();
+            // Ganti label tunggal dengan kolom vertikal: angka Masehi (dari
+            // label bawaan) + angka Hijriah kecil. Warna diambil dari theme
+            // node sel sehingga selalu cocok dengan tema & status hari.
+            const gregText = native.get_text();
             const hd = formatHijri(btn._date, offset, calType, {day: 'numeric'});
-            label.clutter_text.use_markup = true;
-            label.clutter_text.line_alignment = Pango.Alignment.CENTER;
-            label.text = `${greg}\n<span size="x-small" alpha="60%">${hd}</span>`;
+
+            const box = new St.BoxLayout({
+                orientation: Clutter.Orientation.VERTICAL,
+                x_expand: true,
+                y_expand: true,
+                x_align: Clutter.ActorAlign.CENTER,
+                y_align: Clutter.ActorAlign.CENTER,
+            });
+            const greg = new St.Label({
+                text: gregText,
+                x_align: Clutter.ActorAlign.CENTER,
+            });
+            greg.clutter_text.x_align = Clutter.ActorAlign.CENTER;
+            const hijri = new St.Label({
+                text: hd,
+                style_class: 'hijri-day-number',
+                x_align: Clutter.ActorAlign.CENTER,
+            });
+            hijri.clutter_text.x_align = Clutter.ActorAlign.CENTER;
+            box.add_child(greg);
+            box.add_child(hijri);
+
+            btn.set_child(box); // menggantikan label bawaan
+            btn._hijriGreg = greg;
+            btn._hijriSub = hijri;
             btn._hijriDecorated = true;
+            count++;
+        }
+        console.log(`[hijri-clock] dekorasi kalender: ${count} sel, total ${buttons.length}`);
+        this._recolorCalendar();
+    }
+
+    // Salin warna teks dari theme node tiap sel (adaptif tema & status hari).
+    _recolorCalendar() {
+        const buttons = this._calendar?._buttons;
+        if (!buttons)
+            return;
+        for (const btn of buttons) {
+            if (!btn?._hijriGreg)
+                continue;
+            let c;
+            try {
+                c = btn.get_theme_node().get_foreground_color();
+            } catch (_e) {
+                continue;
+            }
+            const rgb = `${c.red},${c.green},${c.blue}`;
+            btn._hijriGreg.set_style(`color: rgb(${rgb});`);
+            btn._hijriSub.set_style(`color: rgba(${rgb}, 0.6); font-size: 0.62em;`);
         }
     }
 }

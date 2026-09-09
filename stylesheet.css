@@ -4,10 +4,10 @@
     font-feature-settings: "tnum";
 }
 
-/* Angka Hijriah kecil di tiap sel tanggal kalender. */
+/* Angka Hijriah kecil di tiap sel tanggal kalender.
+   Warna & ukuran font di-set inline oleh extension (disalin dari warna tema
+   sel), jadi di sini cukup jarak & angka rata. */
 .hijri-day-number {
-    font-size: 0.58em;
-    opacity: 0.5;
     padding-top: 1px;
     font-feature-settings: "tnum";
 }
