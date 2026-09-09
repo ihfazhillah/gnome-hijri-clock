@@ -211,7 +211,6 @@ export default class HijriClockExtension extends Extension {
         if (!buttons)
             return;
         const {offset, calType} = this._config();
-        let count = 0;
         for (const btn of buttons) {
             if (!btn?._date || btn._hijriDecorated)
                 continue;
@@ -250,9 +249,7 @@ export default class HijriClockExtension extends Extension {
             btn._hijriGreg = greg;
             btn._hijriSub = hijri;
             btn._hijriDecorated = true;
-            count++;
         }
-        console.log(`[hijri-clock] dekorasi kalender: ${count} sel, total ${buttons.length}`);
         this._recolorCalendar();
     }
 
