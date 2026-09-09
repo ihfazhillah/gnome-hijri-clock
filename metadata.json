@@ -1,0 +1,10 @@
+{
+  "uuid": "hijri-clock@ihfazh.com",
+  "name": "Hijri Clock",
+  "description": "Menampilkan tanggal Hijriah berdampingan dengan jam Masehi di panel atas GNOME, serta menambahkan angka Hijriah pada tiap tanggal di kalender dropdown. Mendukung koreksi ±hari dan beberapa metode penanggalan (Umm al-Qura, civil, tabular).",
+  "shell-version": ["50"],
+  "settings-schema": "org.gnome.shell.extensions.hijri-clock",
+  "gettext-domain": "hijri-clock",
+  "url": "https://github.com/ihfazh/gnome-hijri-clock",
+  "version-name": "1.0.0"
+}

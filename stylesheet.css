@@ -1,0 +1,20 @@
+/* Hijri Clock — gaya mengikuti tema Adwaita (warna mewarisi tema). */
+
+.hijri-panel-label {
+    font-feature-settings: "tnum";
+}
+
+/* Angka Hijriah kecil di tiap sel tanggal kalender. */
+.hijri-day-number {
+    font-size: 0.58em;
+    opacity: 0.5;
+    padding-top: 1px;
+    font-feature-settings: "tnum";
+}
+
+/* Header tanggal Hijriah lengkap di dalam popup. */
+.hijri-popup-header {
+    font-size: 0.95em;
+    opacity: 0.7;
+    padding: 0 0 8px 12px;
+}

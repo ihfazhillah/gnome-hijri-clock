@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.hijri-clock"
+          path="/org/gnome/shell/extensions/hijri-clock/">
+    <key name="show-panel" type="b">
+      <default>true</default>
+      <summary>Tampilkan tanggal Hijriah di panel</summary>
+    </key>
+    <key name="show-calendar-numbers" type="b">
+      <default>true</default>
+      <summary>Tampilkan angka Hijriah di kalender dropdown</summary>
+    </key>
+    <key name="calendar-type" type="s">
+      <default>'islamic-umalqura'</default>
+      <summary>Metode kalender Hijriah (Intl calendar id)</summary>
+    </key>
+    <key name="day-offset" type="i">
+      <default>0</default>
+      <range min="-3" max="3"/>
+      <summary>Koreksi jumlah hari</summary>
+    </key>
+  </schema>
+</schemalist>
