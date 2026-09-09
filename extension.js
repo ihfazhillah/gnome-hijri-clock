@@ -12,6 +12,8 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
+import {BmkgWeatherSection} from './bmkgWeather.js';
+
 // Locale untuk nama bulan (Bahasa Indonesia). Angka tetap latin.
 const LOCALE = 'id-ID';
 
@@ -74,6 +76,20 @@ export default class HijriClockExtension extends Extension {
                 this._updatePopupHeader(new Date(datetime.to_unix() * 1000));
             });
 
+        // 4) Cuaca BMKG — section sendiri, ditaruh setelah cuaca bawaan.
+        this._weatherItem = dateMenu._weatherItem;
+        this._bmkgWeather = new BmkgWeatherSection(this._settings);
+        const displaysBox = this._weatherItem.get_parent();
+        displaysBox.insert_child_above(this._bmkgWeather, this._weatherItem);
+
+        // Jaga agar cuaca bawaan tetap tersembunyi bila dipilih demikian
+        // (widget bawaan bisa memunculkan dirinya lagi saat data berubah).
+        this._nativeVisibleId = this._weatherItem.connect('notify::visible', () => {
+            if (this._settings.get_boolean('hide-native-weather') &&
+                this._weatherItem.visible)
+                this._weatherItem.visible = false;
+        });
+
         // Terapkan perubahan pengaturan secara langsung.
         this._settingsId =
             this._settings.connect('changed', () => this._applyAll());
@@ -95,10 +111,21 @@ export default class HijriClockExtension extends Extension {
             this._settingsId = null;
         }
 
+        if (this._nativeVisibleId) {
+            this._weatherItem.disconnect(this._nativeVisibleId);
+            this._nativeVisibleId = null;
+        }
+        // Kembalikan tampilan cuaca bawaan.
+        if (this._weatherItem)
+            this._weatherItem.visible = true;
+
         this._panelLabel?.destroy();
         this._panelLabel = null;
         this._popupHeader?.destroy();
         this._popupHeader = null;
+        this._bmkgWeather?.destroy();
+        this._bmkgWeather = null;
+        this._weatherItem = null;
 
         // Kembalikan _rebuildCalendar asli lalu gambar ulang kalender bersih.
         if (this._origRebuild && this._calendar) {
@@ -128,6 +155,20 @@ export default class HijriClockExtension extends Extension {
         this._updatePopupHeader(sel);
         // Bangun ulang agar angka Hijriah ikut berubah (atau hilang jika dimatikan).
         this._calendar._rebuildCalendar();
+
+        // Cuaca.
+        const showWeather = this._settings.get_boolean('show-weather');
+        this._bmkgWeather.visible = showWeather;
+        if (this._settings.get_boolean('hide-native-weather'))
+            this._weatherItem.visible = false;
+        else
+            this._weatherItem.visible = true;
+        if (showWeather) {
+            this._bmkgWeather.refresh();
+            this._bmkgWeather.startAutoRefresh();
+        } else {
+            this._bmkgWeather.stopAutoRefresh();
+        }
     }
 
     _updatePanel() {

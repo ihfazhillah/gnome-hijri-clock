@@ -19,5 +19,26 @@
       <range min="-3" max="3"/>
       <summary>Koreksi jumlah hari</summary>
     </key>
+    <key name="show-weather" type="b">
+      <default>true</default>
+      <summary>Tampilkan cuaca BMKG di dropdown</summary>
+    </key>
+    <key name="hide-native-weather" type="b">
+      <default>true</default>
+      <summary>Sembunyikan widget cuaca bawaan GNOME</summary>
+    </key>
+    <key name="adm4" type="s">
+      <default>''</default>
+      <summary>Kode wilayah tingkat IV (desa/kelurahan) untuk cuaca BMKG</summary>
+    </key>
+    <key name="location-name" type="s">
+      <default>''</default>
+      <summary>Nama lokasi cuaca terpilih (untuk tampilan pengaturan)</summary>
+    </key>
+    <key name="weather-refresh-mins" type="i">
+      <default>60</default>
+      <range min="10" max="360"/>
+      <summary>Interval penyegaran cuaca (menit)</summary>
+    </key>
   </schema>
 </schemalist>

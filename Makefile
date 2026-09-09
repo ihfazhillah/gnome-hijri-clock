@@ -1,6 +1,6 @@
 UUID = hijri-clock@ihfazh.com
 INSTALL_DIR = $(HOME)/.local/share/gnome-shell/extensions/$(UUID)
-FILES = extension.js prefs.js metadata.json stylesheet.css schemas
+FILES = extension.js bmkgWeather.js prefs.js metadata.json stylesheet.css schemas data
 
 .PHONY: all schemas install enable disable uninstall zip
 
