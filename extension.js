@@ -208,13 +208,16 @@ export default class HijriClockExtension extends Extension {
                 continue;
 
             // Tambah angka Hijriah sebagai baris kedua lewat Pango markup pada
-            // label bawaan — warna tema angka Masehi tetap terjaga.
-            const greg = btn.label ?? label.get_text();
+            // label bawaan. Markup di-set melalui properti `text` St.Label
+            // (bukan langsung clutter_text) dengan use_markup aktif, agar tidak
+            // terhapus saat St menyinkronkan ulang label. Warna angka Hijriah
+            // mewarisi warna label asli (alpha 60%) sehingga otomatis
+            // menyesuaikan tema terang/gelap dan status hari (ini/lain bulan).
+            const greg = label.get_text();
             const hd = formatHijri(btn._date, offset, calType, {day: 'numeric'});
             label.clutter_text.use_markup = true;
-            label.clutter_text.set_markup(
-                `${greg}\n<span size="x-small" alpha="60%">${hd}</span>`);
             label.clutter_text.line_alignment = Pango.Alignment.CENTER;
+            label.text = `${greg}\n<span size="x-small" alpha="60%">${hd}</span>`;
             btn._hijriDecorated = true;
         }
     }
