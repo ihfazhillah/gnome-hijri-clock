@@ -28,7 +28,7 @@ GNOME Shell **50** (X11 & Wayland).
 ### Dari sumber
 
 ```bash
-git clone https://github.com/ihfazh/gnome-hijri-clock.git
+git clone https://github.com/ihfazhillah/gnome-hijri-clock.git
 cd gnome-hijri-clock
 make install
 ```
